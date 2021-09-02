@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import {
-  helloWorldContract,
+  // helloWorldContract,
   connectWallet,
   updateMessage,
   loadCurrentMessage,
@@ -18,31 +18,75 @@ const HelloWorld = () => {
   const [newMessage, setNewMessage] = useState("");
 
   //called only once
-  useEffect(async () => {
-    
+  useEffect(() => {
+    //   async function fetchContract() {
+    //     const message = await loadCurrentMessage();
+    //     setMessage(message);
+    //     addSmartContractListener();
+    //   }
+    //   fetchContract();
+
+    async function fetchWallet() {
+      const { address, status } = await getCurrentWalletConnected();
+      setWallet(address);
+      setStatus(status);
+    }
+    fetchWallet();
+    addWalletListener();
   }, []);
 
-  function addSmartContractListener() { //TODO: implement
-    
+  // function addSmartContractListener() {
+  //   helloWorldContract.events.UpdatedMessages({}, (error, data) => {
+  //     if (error) {
+  //       setStatus("error occurred");
+  //     } else {
+  //       setMessage(data.returnValues[1]);
+  //       setNewMessage("");
+  //       setStatus("Your message has been updated!");
+  //     }
+  //   });
+  // }
+
+  function addWalletListener() {
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", (accounts) => {
+        if (accounts.length > 0) {
+          setWallet(accounts[0]);
+          setStatus("👆🏽 Write a message in the text-field above.");
+        } else {
+          setWallet("");
+          setStatus("🦊 Connect to Metamask using the top right button.");
+        }
+      });
+    } else {
+      setStatus(
+        <p>
+          {" "}
+          🦊{" "}
+          <a target='_blank' href={`https://metamask.io/download.html`}>
+            You must install Metamask, a virtual Ethereum wallet, in your
+            browser.
+          </a>
+        </p>
+      );
+    }
   }
 
-  function addWalletListener() { //TODO: implement
-    
-  }
-
-  const connectWalletPressed = async () => { //TODO: implement
-    
+  const connectWalletPressed = async () => {
+    const walletResponse = await connectWallet();
+    setStatus(walletResponse.status);
+    setWallet(walletResponse.address);
   };
 
-  const onUpdatePressed = async () => { //TODO: implement
-    
+  const onUpdatePressed = async () => {
+    //TODO: implement
   };
 
   //the UI of our component
   return (
-    <div id="container">
-      <img id="logo" src={alchemylogo}></img>
-      <button id="walletButton" onClick={connectWalletPressed}>
+    <div id='container'>
+      <img id='logo' src={alchemylogo} alt='logo-of-company'></img>
+      <button id='walletButton' onClick={connectWalletPressed}>
         {walletAddress.length > 0 ? (
           "Connected: " +
           String(walletAddress).substring(0, 6) +
@@ -60,14 +104,14 @@ const HelloWorld = () => {
 
       <div>
         <input
-          type="text"
-          placeholder="Update the message in your smart contract."
+          type='text'
+          placeholder='Update the message in your smart contract.'
           onChange={(e) => setNewMessage(e.target.value)}
           value={newMessage}
         />
-        <p id="status">{status}</p>
+        <p id='status'>{status}</p>
 
-        <button id="publish" onClick={onUpdatePressed}>
+        <button id='publish' onClick={onUpdatePressed}>
           Update
         </button>
       </div>
