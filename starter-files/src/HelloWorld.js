@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import {
-  // helloWorldContract,
+  helloWorldContract,
   connectWallet,
   updateMessage,
   loadCurrentMessage,
@@ -19,12 +19,12 @@ const HelloWorld = () => {
 
   //called only once
   useEffect(() => {
-    //   async function fetchContract() {
-    //     const message = await loadCurrentMessage();
-    //     setMessage(message);
-    //     addSmartContractListener();
-    //   }
-    //   fetchContract();
+    async function fetchContract() {
+      const message = await loadCurrentMessage();
+      setMessage(message);
+      addSmartContractListener();
+    }
+    fetchContract();
 
     async function fetchWallet() {
       const { address, status } = await getCurrentWalletConnected();
@@ -33,19 +33,20 @@ const HelloWorld = () => {
     }
     fetchWallet();
     addWalletListener();
+    addSmartContractListener();
   }, []);
 
-  // function addSmartContractListener() {
-  //   helloWorldContract.events.UpdatedMessages({}, (error, data) => {
-  //     if (error) {
-  //       setStatus("error occurred");
-  //     } else {
-  //       setMessage(data.returnValues[1]);
-  //       setNewMessage("");
-  //       setStatus("Your message has been updated!");
-  //     }
-  //   });
-  // }
+  function addSmartContractListener() {
+    helloWorldContract.events.UpdatedMessages({}, (error, data) => {
+      if (error) {
+        setStatus("error occurred");
+      } else {
+        setMessage(data.returnValues[1]);
+        setNewMessage("");
+        setStatus("Your message has been updated!");
+      }
+    });
+  }
 
   function addWalletListener() {
     if (window.ethereum) {
@@ -80,6 +81,8 @@ const HelloWorld = () => {
 
   const onUpdatePressed = async () => {
     //TODO: implement
+    const { status } = await updateMessage(walletAddress, newMessage);
+    setStatus(status);
   };
 
   //the UI of our component
